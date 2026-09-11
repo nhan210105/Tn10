@@ -1,0 +1,30 @@
+workflows:
+  ios-build:
+    name: TnCheats iOS Build
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+    scripts:
+      - name: Build TnCheats
+        script: |
+          set -e
+          xcodebuild \
+            -project "TnCheat.xcodeproj" \
+            -scheme "3105" \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+
+          APP_PATH="build/Build/Products/Release-iphoneos/TnCheats.app"
+          test -d "$APP_PATH"
+
+          rm -rf build/ipa
+          mkdir -p build/ipa/Payload
+          cp -R "$APP_PATH" build/ipa/Payload/
+          /usr/bin/zip -qry build/ipa/TnCheats.ipa build/ipa/Payload
+    artifacts:
+      - build/ipa/TnCheats.ipa
+      - build/Build/Products/Release-iphoneos/TnCheats.app
